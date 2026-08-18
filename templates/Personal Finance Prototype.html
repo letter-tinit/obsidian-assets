@@ -1,0 +1,1217 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Personal Finance Prototype</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f6f4;
+      --panel: #ffffff;
+      --panel-2: #f9faf8;
+      --ink: #1b211d;
+      --muted: #647069;
+      --line: #dbe2dc;
+      --line-strong: #c5cec6;
+      --green: #0f7f68;
+      --green-soft: #dcefe9;
+      --blue: #286b8f;
+      --blue-soft: #dcebf2;
+      --amber: #9b6819;
+      --amber-soft: #f3e8d4;
+      --red: #ad2d24;
+      --red-soft: #f5dfdc;
+      --ink-soft: #eef1ee;
+      --shadow: 0 24px 80px rgba(26, 34, 29, 0.16);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    .prototype {
+      display: grid;
+      grid-template-columns: minmax(280px, 360px) minmax(390px, 1fr);
+      gap: 34px;
+      min-height: 100vh;
+      padding: 32px;
+      align-items: center;
+    }
+
+    .spec {
+      align-self: stretch;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 22px;
+      max-width: 360px;
+    }
+
+    .spec h1 {
+      margin: 0;
+      font-size: 30px;
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    .spec p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 15px;
+    }
+
+    .screen-picker {
+      display: grid;
+      gap: 8px;
+    }
+
+    .screen-button {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--ink);
+      padding: 12px 12px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .screen-button span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .screen-button.active {
+      border-color: var(--green);
+      background: var(--green-soft);
+    }
+
+    .notes {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .notes h2 {
+      margin: 0 0 10px;
+      font-size: 15px;
+      letter-spacing: 0;
+    }
+
+    .notes ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 13px;
+    }
+
+    .stage {
+      display: grid;
+      place-items: center;
+      min-width: 0;
+    }
+
+    .device {
+      width: min(100%, 414px);
+      height: 860px;
+      border: 12px solid #151917;
+      border-radius: 44px;
+      background: #151917;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .phone {
+      height: 100%;
+      border-radius: 30px;
+      background: var(--panel-2);
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    .status {
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 22px;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 700;
+      background: var(--panel-2);
+    }
+
+    .status-icons {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 99px;
+      background: var(--ink);
+      opacity: 0.8;
+    }
+
+    .battery {
+      width: 22px;
+      height: 10px;
+      border: 1.5px solid var(--ink);
+      border-radius: 3px;
+      position: relative;
+    }
+
+    .battery::before {
+      content: "";
+      position: absolute;
+      left: 2px;
+      top: 2px;
+      height: 4px;
+      width: 13px;
+      background: var(--ink);
+      border-radius: 1px;
+    }
+
+    .app {
+      min-height: 0;
+      overflow: hidden;
+      display: grid;
+    }
+
+    .screen {
+      min-height: 0;
+      overflow-y: auto;
+      padding: 16px 16px 18px;
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .appbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .appbar h2 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 0;
+    }
+
+    .appbar small {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .icon-button {
+      width: 38px;
+      height: 38px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--ink);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+
+    .icon {
+      width: 19px;
+      height: 19px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .summary {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .summary-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .label {
+      margin: 0 0 5px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .money-xl {
+      font-size: 28px;
+      line-height: 1;
+      font-weight: 750;
+      letter-spacing: 0;
+    }
+
+    .money-lg {
+      font-size: 20px;
+      line-height: 1.1;
+      font-weight: 750;
+      letter-spacing: 0;
+    }
+
+    .money-md {
+      font-size: 15px;
+      font-weight: 750;
+      letter-spacing: 0;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .pill.good {
+      background: var(--green-soft);
+      color: var(--green);
+    }
+
+    .pill.warn {
+      background: var(--amber-soft);
+      color: var(--amber);
+    }
+
+    .pill.bad {
+      background: var(--red-soft);
+      color: var(--red);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 11px;
+      background: var(--panel);
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 16px 0 8px;
+    }
+
+    .section-title h3 {
+      margin: 0;
+      font-size: 15px;
+      letter-spacing: 0;
+    }
+
+    .section-title span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .budget-list,
+    .list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .budget-row,
+    .transaction,
+    .asset-row,
+    .decision-row {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .row-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .row-head strong {
+      font-size: 14px;
+    }
+
+    .row-head span,
+    .transaction small,
+    .asset-row small,
+    .decision-row small {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .progress {
+      width: 100%;
+      height: 8px;
+      background: var(--ink-soft);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .bar {
+      height: 100%;
+      border-radius: inherit;
+    }
+
+    .bar.needs {
+      width: 74%;
+      background: var(--amber);
+    }
+
+    .bar.wants {
+      width: 15%;
+      background: var(--blue);
+    }
+
+    .bar.savings {
+      width: 0%;
+      background: var(--green);
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 12px 0;
+    }
+
+    .action {
+      min-height: 58px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--ink);
+      cursor: pointer;
+      display: grid;
+      justify-items: center;
+      align-content: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .action.primary {
+      background: var(--green);
+      color: white;
+      border-color: var(--green);
+    }
+
+    .transaction {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .transaction strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 3px;
+    }
+
+    .negative {
+      color: var(--red);
+    }
+
+    .positive {
+      color: var(--green);
+    }
+
+    .form-panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .input,
+    .textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      border-radius: 8px;
+      padding: 11px 12px;
+      color: var(--ink);
+      outline: none;
+    }
+
+    .amount-input {
+      font-size: 28px;
+      font-weight: 760;
+      letter-spacing: 0;
+      padding: 13px 12px;
+    }
+
+    .textarea {
+      min-height: 74px;
+      resize: none;
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      padding: 4px;
+      background: var(--ink-soft);
+      border-radius: 8px;
+    }
+
+    .segment {
+      border: 0;
+      background: transparent;
+      border-radius: 7px;
+      padding: 9px 4px;
+      font-size: 12px;
+      font-weight: 750;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .segment.active {
+      background: var(--panel);
+      color: var(--ink);
+      box-shadow: 0 1px 2px rgba(27, 33, 29, 0.08);
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .chip {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--panel);
+      color: var(--ink);
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .chip.active {
+      background: var(--blue-soft);
+      border-color: #aacddd;
+      color: var(--blue);
+    }
+
+    .primary-button,
+    .secondary-button {
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-weight: 780;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .primary-button {
+      border: 1px solid var(--green);
+      background: var(--green);
+      color: white;
+    }
+
+    .secondary-button {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--ink);
+    }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .fund-header {
+      background: var(--red-soft);
+      border: 1px solid #edb8b2;
+      color: var(--red);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .fund-header .label {
+      color: var(--red);
+      opacity: 0.82;
+    }
+
+    .asset-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .asset-row strong {
+      font-size: 14px;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--line);
+      margin: 10px 0;
+    }
+
+    .net-chart {
+      height: 120px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      padding: 14px;
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .chart-col {
+      flex: 1;
+      display: grid;
+      align-items: end;
+      gap: 6px;
+      height: 100%;
+    }
+
+    .chart-bar {
+      border-radius: 6px 6px 0 0;
+      background: var(--green);
+      min-height: 14px;
+    }
+
+    .chart-col small {
+      color: var(--muted);
+      font-size: 10px;
+      text-align: center;
+    }
+
+    .close-step {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 13px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .close-step header {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .close-step strong {
+      font-size: 14px;
+    }
+
+    .close-step p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .decision-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .bottom-nav {
+      background: var(--panel);
+      border-top: 1px solid var(--line);
+      padding: 8px 10px 10px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 4px;
+    }
+
+    .nav-item {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      border-radius: 8px;
+      padding: 7px 2px;
+      display: grid;
+      justify-items: center;
+      gap: 3px;
+      cursor: pointer;
+      min-width: 0;
+    }
+
+    .nav-item span {
+      font-size: 10px;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .nav-item.active {
+      background: var(--green-soft);
+      color: var(--green);
+    }
+
+    @media (max-width: 900px) {
+      .prototype {
+        grid-template-columns: 1fr;
+        padding: 18px;
+      }
+
+      .spec {
+        max-width: none;
+        order: 2;
+      }
+
+      .device {
+        height: 820px;
+      }
+    }
+
+    @media (max-width: 460px) {
+      .prototype {
+        padding: 0;
+        gap: 0;
+      }
+
+      .stage {
+        min-height: 100vh;
+        background: #151917;
+      }
+
+      .device {
+        width: 100%;
+        height: 100vh;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      .phone {
+        border-radius: 0;
+      }
+
+      .spec {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="prototype">
+    <aside class="spec" aria-label="Prototype notes">
+      <div>
+        <h1>Personal Finance</h1>
+        <p>Local-first iOS prototype for monthly planning, daily transaction capture, Incident Fund control, Net Worth snapshots, and month close review.</p>
+      </div>
+
+      <nav class="screen-picker" aria-label="Screen selector">
+        <button class="screen-button active" data-target="home">Current Month <span>overview</span></button>
+        <button class="screen-button" data-target="add">Add Transaction <span>daily input</span></button>
+        <button class="screen-button" data-target="incident">Incident Fund <span>separate ledger</span></button>
+        <button class="screen-button" data-target="networth">Net Worth <span>snapshot</span></button>
+        <button class="screen-button" data-target="close">Close Month <span>review flow</span></button>
+      </nav>
+
+      <section class="notes">
+        <h2>Design intent</h2>
+        <ul>
+          <li>First screen answers: am I still in control this month?</li>
+          <li>Budget method is only a calculator, not the whole system.</li>
+          <li>Incident Fund is visible but separated from monthly income.</li>
+          <li>Month Close is the product's main decision loop.</li>
+        </ul>
+      </section>
+    </aside>
+
+    <section class="stage" aria-label="iPhone prototype">
+      <div class="device">
+        <div class="phone">
+          <div class="status">
+            <span>9:41</span>
+            <div class="status-icons" aria-label="Status icons">
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="battery"></span>
+            </div>
+          </div>
+
+          <div class="app">
+            <section class="screen active" data-screen="home" aria-label="Current Month">
+              <div class="appbar">
+                <div>
+                  <h2>Jul 2026</h2>
+                  <small>50/30/20 method</small>
+                </div>
+                <button class="icon-button" aria-label="Settings">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M12 3v3M12 18v3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M3 12h3M18 12h3M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+
+              <div class="summary">
+                <div class="summary-top">
+                  <div>
+                    <p class="label">Available after tracked spending</p>
+                    <div class="money-xl">9,362,217</div>
+                  </div>
+                  <span class="pill good">On track</span>
+                </div>
+                <div class="grid-2">
+                  <div class="metric">
+                    <p class="label">Income</p>
+                    <div class="money-md">16,020,850</div>
+                  </div>
+                  <div class="metric">
+                    <p class="label">Spent</p>
+                    <div class="money-md">6,658,633</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="actions">
+                <button class="action primary" data-target="add">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                  <span>Add</span>
+                </button>
+                <button class="action" data-target="incident">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M4 7h16v10H4z"/><path d="M8 11h8M8 14h5"/></svg>
+                  <span>Incident</span>
+                </button>
+                <button class="action" data-target="close">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M5 12l4 4L19 6"/><path d="M5 20h14"/></svg>
+                  <span>Close</span>
+                </button>
+              </div>
+
+              <div class="section-title">
+                <h3>Budget Status</h3>
+                <span>actual / target</span>
+              </div>
+              <div class="budget-list">
+                <div class="budget-row">
+                  <div class="row-head">
+                    <strong>Needs</strong>
+                    <span>5,958,633 / 8,010,425</span>
+                  </div>
+                  <div class="progress"><div class="bar needs"></div></div>
+                </div>
+                <div class="budget-row">
+                  <div class="row-head">
+                    <strong>Wants</strong>
+                    <span>700,000 / 4,806,255</span>
+                  </div>
+                  <div class="progress"><div class="bar wants"></div></div>
+                </div>
+                <div class="budget-row">
+                  <div class="row-head">
+                    <strong>Savings</strong>
+                    <span>0 / 3,204,170</span>
+                  </div>
+                  <div class="progress"><div class="bar savings"></div></div>
+                </div>
+              </div>
+
+              <div class="section-title">
+                <h3>Control Points</h3>
+                <span>monthly</span>
+              </div>
+              <div class="grid-2">
+                <div class="metric">
+                  <p class="label">Incident Fund</p>
+                  <div class="money-lg negative">-3,500,000</div>
+                </div>
+                <div class="metric">
+                  <p class="label">Net Worth</p>
+                  <div class="money-lg">29,300,000</div>
+                </div>
+              </div>
+
+              <div class="section-title">
+                <h3>Recent</h3>
+                <span>3 entries</span>
+              </div>
+              <div class="list">
+                <div class="transaction">
+                  <div><strong>Give Family</strong><small>Wants - Banking</small></div>
+                  <div class="money-md negative">700,000</div>
+                </div>
+                <div class="transaction">
+                  <div><strong>Living expenses</strong><small>Needs - Banking</small></div>
+                  <div class="money-md negative">700,000</div>
+                </div>
+                <div class="transaction">
+                  <div><strong>Debt repaid</strong><small>Incident Fund</small></div>
+                  <div class="money-md positive">500,000</div>
+                </div>
+              </div>
+            </section>
+
+            <section class="screen" data-screen="add" aria-label="Add Transaction">
+              <div class="appbar">
+                <div>
+                  <h2>Add Transaction</h2>
+                  <small>Jul 09, 2026</small>
+                </div>
+                <button class="icon-button" aria-label="Scan receipt">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>
+                </button>
+              </div>
+
+              <div class="form-panel">
+                <div class="field">
+                  <label for="amount">Amount</label>
+                  <input id="amount" class="input amount-input" value="700,000">
+                </div>
+
+                <div class="field">
+                  <label>Group</label>
+                  <div class="segmented">
+                    <button class="segment active">Needs</button>
+                    <button class="segment">Wants</button>
+                    <button class="segment">Savings</button>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label>Category</label>
+                  <div class="chip-row">
+                    <button class="chip active">Food</button>
+                    <button class="chip">Rent</button>
+                    <button class="chip">Electricity</button>
+                    <button class="chip">Transport</button>
+                    <button class="chip">Other</button>
+                  </div>
+                </div>
+
+                <div class="grid-2">
+                  <div class="field">
+                    <label for="date">Date</label>
+                    <input id="date" class="input" value="2026-07-09">
+                  </div>
+                  <div class="field">
+                    <label for="method">Payment</label>
+                    <input id="method" class="input" value="Banking">
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label for="desc">Description</label>
+                  <input id="desc" class="input" value="Living expenses">
+                </div>
+
+                <div class="field">
+                  <label for="note">Note</label>
+                  <textarea id="note" class="textarea">Daily cashflow entry</textarea>
+                </div>
+
+                <button class="primary-button">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M5 12l4 4L19 6"/></svg>
+                  Save Transaction
+                </button>
+              </div>
+
+              <div class="section-title">
+                <h3>Posting Preview</h3>
+                <span>budget impact</span>
+              </div>
+              <div class="decision-row">
+                <div><strong>Needs actual</strong><small>after save</small></div>
+                <div class="money-md">6,658,633</div>
+              </div>
+            </section>
+
+            <section class="screen" data-screen="incident" aria-label="Incident Fund">
+              <div class="appbar">
+                <div>
+                  <h2>Incident Fund</h2>
+                  <small>Vietinbank</small>
+                </div>
+                <button class="icon-button" aria-label="Add incident">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                </button>
+              </div>
+
+              <div class="fund-header">
+                <p class="label">Current Balance</p>
+                <div class="money-xl">-3,500,000</div>
+                <p class="label">Negative balance means the fund needs repair.</p>
+              </div>
+
+              <div class="grid-2">
+                <div class="metric">
+                  <p class="label">Opening</p>
+                  <div class="money-md negative">-4,000,000</div>
+                </div>
+                <div class="metric">
+                  <p class="label">Inflows</p>
+                  <div class="money-md positive">500,000</div>
+                </div>
+              </div>
+
+              <div class="button-row" style="margin-top: 10px;">
+                <button class="primary-button">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                  Inflow
+                </button>
+                <button class="secondary-button">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+                  Outflow
+                </button>
+              </div>
+
+              <div class="section-title">
+                <h3>Ledger</h3>
+                <span>standalone</span>
+              </div>
+              <div class="list">
+                <div class="transaction">
+                  <div><strong>Debt repaid</strong><small>Unexpected Inflow - Uy tra tien</small></div>
+                  <div class="money-md positive">500,000</div>
+                </div>
+                <div class="transaction">
+                  <div><strong>Opening deficit</strong><small>Debt to self</small></div>
+                  <div class="money-md negative">-4,000,000</div>
+                </div>
+              </div>
+            </section>
+
+            <section class="screen" data-screen="networth" aria-label="Net Worth">
+              <div class="appbar">
+                <div>
+                  <h2>Net Worth</h2>
+                  <small>July snapshot</small>
+                </div>
+                <button class="icon-button" aria-label="Create snapshot">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M4 19V5M4 19h16"/><path d="M8 15l3-4 3 2 4-7"/></svg>
+                </button>
+              </div>
+
+              <div class="summary">
+                <div class="summary-top">
+                  <div>
+                    <p class="label">Net Worth</p>
+                    <div class="money-xl">29,300,000</div>
+                  </div>
+                  <span class="pill good">Snapshot</span>
+                </div>
+                <div class="grid-2">
+                  <div class="metric">
+                    <p class="label">Assets</p>
+                    <div class="money-md positive">32,800,000</div>
+                  </div>
+                  <div class="metric">
+                    <p class="label">Liabilities</p>
+                    <div class="money-md negative">3,500,000</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="net-chart" aria-label="Net worth chart">
+                <div class="chart-col"><div class="chart-bar" style="height: 55%;"></div><small>May</small></div>
+                <div class="chart-col"><div class="chart-bar" style="height: 72%;"></div><small>Jun</small></div>
+                <div class="chart-col"><div class="chart-bar" style="height: 82%;"></div><small>Jul</small></div>
+              </div>
+
+              <div class="section-title">
+                <h3>Assets</h3>
+                <span>32,800,000</span>
+              </div>
+              <div class="list">
+                <div class="asset-row"><div><strong>Bank checking cash</strong><small>Liquid</small></div><div class="money-md">10,000,000</div></div>
+                <div class="asset-row"><div><strong>Savings account</strong><small>Bank deposit</small></div><div class="money-md">15,000,000</div></div>
+                <div class="asset-row"><div><strong>Physical assets</strong><small>TV, motorbike</small></div><div class="money-md">7,800,000</div></div>
+              </div>
+
+              <div class="section-title">
+                <h3>Liabilities</h3>
+                <span>3,500,000</span>
+              </div>
+              <div class="list">
+                <div class="asset-row"><div><strong>Incident Fund deficit</strong><small>Debt to self</small></div><div class="money-md negative">3,500,000</div></div>
+              </div>
+            </section>
+
+            <section class="screen" data-screen="close" aria-label="Close Month">
+              <div class="appbar">
+                <div>
+                  <h2>Close Month</h2>
+                  <small>July 2026 review</small>
+                </div>
+                <button class="icon-button" aria-label="Export">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+                </button>
+              </div>
+
+              <div class="summary">
+                <div class="summary-top">
+                  <div>
+                    <p class="label">Ready to close</p>
+                    <div class="money-lg">3 decisions left</div>
+                  </div>
+                  <span class="pill warn">Review</span>
+                </div>
+                <div class="progress"><div class="bar" style="width: 42%; background: var(--amber);"></div></div>
+              </div>
+
+              <div class="list">
+                <div class="close-step">
+                  <header>
+                    <strong>Budget Review</strong>
+                    <span class="pill good">OK</span>
+                  </header>
+                  <p>Needs and Wants are still under target. Savings has not been posted yet.</p>
+                </div>
+
+                <div class="close-step">
+                  <header>
+                    <strong>Incident Fund</strong>
+                    <span class="pill bad">Negative</span>
+                  </header>
+                  <p>Current balance is -3,500,000. Decide whether next surplus should repair this first.</p>
+                  <div class="button-row">
+                    <button class="secondary-button">Carry</button>
+                    <button class="primary-button">Repair First</button>
+                  </div>
+                </div>
+
+                <div class="close-step">
+                  <header>
+                    <strong>Net Worth Snapshot</strong>
+                    <span class="pill good">Done</span>
+                  </header>
+                  <p>July snapshot is 29,300,000 after liabilities.</p>
+                </div>
+
+                <div class="close-step">
+                  <header>
+                    <strong>Next Month</strong>
+                    <span class="pill warn">Pending</span>
+                  </header>
+                  <p>Create August plan with the same method, then adjust fixed needs if needed.</p>
+                  <button class="primary-button">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                    Create August
+                  </button>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <nav class="bottom-nav" aria-label="App navigation">
+            <button class="nav-item active" data-target="home">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>
+              <span>Month</span>
+            </button>
+            <button class="nav-item" data-target="add">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+              <span>Add</span>
+            </button>
+            <button class="nav-item" data-target="incident">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M4 7h16v10H4z"/><path d="M8 11h8M8 14h5"/></svg>
+              <span>Fund</span>
+            </button>
+            <button class="nav-item" data-target="networth">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M4 19V5M4 19h16"/><path d="M8 15l3-4 3 2 4-7"/></svg>
+              <span>Worth</span>
+            </button>
+            <button class="nav-item" data-target="close">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M5 12l4 4L19 6"/><path d="M5 20h14"/></svg>
+              <span>Close</span>
+            </button>
+          </nav>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const controls = document.querySelectorAll("[data-target]");
+    const screens = document.querySelectorAll("[data-screen]");
+    const navItems = document.querySelectorAll(".nav-item");
+    const screenButtons = document.querySelectorAll(".screen-button");
+
+    function showScreen(name) {
+      screens.forEach((screen) => {
+        screen.classList.toggle("active", screen.dataset.screen === name);
+      });
+
+      navItems.forEach((item) => {
+        item.classList.toggle("active", item.dataset.target === name);
+      });
+
+      screenButtons.forEach((item) => {
+        item.classList.toggle("active", item.dataset.target === name);
+      });
+    }
+
+    controls.forEach((control) => {
+      control.addEventListener("click", () => showScreen(control.dataset.target));
+    });
+  </script>
+</body>
+</html>
